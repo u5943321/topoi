@@ -31,93 +31,125 @@ val _ = new_axiom("compose_assoc",
 (*universal property, for every f: T --> A, g: T --> B, there exists a unique arrow
 ⟨f,g⟩, such that pr1 o ⟨f,g⟩ = f ∧ pr2 o ⟨f, g⟩ = g*)
 
-val _ = new_constant("is_prod",
-                     “: object -> object -> object -> arrow -> arrow -> bool”)
-
-val _ = new_axiom("prod_def", “∀A B C pr1 pr2.
-                                 is_prod A B C pr1 pr2 <=> 
-                                 dom pr1 = C ∧ cod pr1 = A ∧
-                                 dom pr2 = C ∧ cod pr2 = B ∧
-                                 (∀X f g.
-                                  dom f = X ∧ cod f = A ∧
-                                  dom g = X ∧ cod g = B ⇒
-                                  ∃!i. dom i = X ∧ cod i = C ∧
-                                       pr1 o i = f ∧ pr2 o i = g)”)
-
 val _ = new_constant("prod_obj", “:object -> object -> object”)                                        
 val _ = new_constant("p1", “:object -> object -> arrow”)
 
 val _ = new_constant("p2", “:object -> object -> arrow”)
 
-val _ = new_constant("prod_ar", “:arrow -> arrow -> arrow”)       
-
-val _ = new_axiom("prod_exists", “∀A B. is_prod A B (prod_obj A B) (p1 A B) (p2 A B)”)                                  
-                                  
+val _ = new_constant("prod_ar", “:arrow -> arrow -> arrow”)        
+    
+val _ = new_axiom("prod_diag", “∀A B. dom (pr1 A B) = prod_obj A B ∧
+                                      dom (pr2 A B) = prod_obj A B ∧
+                                      cod (pr1 A B) = A ∧
+                                      cod (pr1 A B) = B”)              
+                     
+val _ = new_axiom("prod_up", “∀A B X f g.
+                                  dom f = X ∧ cod f = A ∧
+                                  dom g = X ∧ cod g = B ⇒
+                                  dom (prod_ar f g) = X ∧
+                                  cod (prod_ar f g) = C ∧
+                                  (pr1 A B) o (prod_ar f g) = f ∧
+                                  (pr2 A B) o (prod_ar f g) = g ∧
+                                  (∀u. dom u = X ∧ cod u = C ∧
+                                  (pr1 A B) o u = f ∧
+                                  (pr2 A B) o u = g) ⇒ u = (prod_ar f g)”)                                
+                                                                  
 (* pullback *)
 
-val _ = new_constant("is_pullback", “:arrow -> arrow -> object -> arrow -> arrow -> bool”)
+val _ = new_constant("pb_obj", “: arrow -> arrow -> object”)
 
-val _ = new_axiom("pullback_def",
-                  “∀f g P i j.
-                   is_pullback f g P i j ⇔
-                   cod f = cod g ∧
-                   dom i = P ∧ dom j = P ∧
-                   cod i = dom f ∧ cod j = dom g ∧
-                   f o i = g o j ∧
-                   (∀X t1 t2. dom t1 = X ∧ dom t2 = X ∧
-                              cod t1 = A ∧ cod t2 = B ∧
-                              f o t1 = g o t2 ⇒
-                              ∃!u. dom u = X ∧ cod u = P ∧
-                                   i o u = t1 ∧ j o u = t2)”)
-                                   
-val _ = new_axiom("pullback_exists",
-                  “∀f g. cod f = cod g ⇒ ∃P i j. is_pullback f g P i j”)
-                  
+val _ = new_constant("pb_ars", “: arrow -> arrow -> (arrow # arrow)”)
+
+val _ = new_axiom("pb_diag",
+                  “∀f g.
+                     cod f = cod g ⇒
+                     dom (FST (pb_ars f g)) = dom (SND (pb_ars f g)) ∧
+                     dom (SND (pb_ars f g)) = pb_obj f g ∧
+                     cod (FST (pb_ars f g)) = dom f ∧
+                     cod (SND (pb_ars f g)) = dom g ∧
+                     f o (FST (pb_ars f g)) = g o (SND (pb_ars f g))
+                  ”)
+
+val _ = new_constant("pb_induce",
+                     “: arrow -> arrow -> arrow -> arrow -> arrow”)
+                                  
+val _ = new_axiom("pb_up",
+                  “∀X x1 x2 f g.
+                     dom x1 = dom x2 ∧ dom x2 = X ∧
+                     cod x1 = dom f ∧ cod x2 = dom g ∧
+                     f o x1 = g o x2 ⇒
+                     dom (pb_induce f g x1 x2) = X ∧
+                     cod (pb_induce f g x1 x2) = pb_obj f g ∧
+                     (FST (pb_ars f g)) o (pb_induce f g x1 x2) = x1 ∧
+                     (SND (pb_ars f g)) o (pb_induce f g x1 x2) = x2 ∧
+                     (∀u. dom u = X ∧ cod u = pb_obj f g ∧
+                          (FST (pb_ars f g)) o u = x1 ∧
+                          (SND (pb_ars f g)) o u = x2 ⇒
+                          u = pb_induce f g x1 x2)
+                  ”)
+                                                     
 (*terminal object*)
 
-val _ = new_constant("is_terminal", “:object -> bool”)
+val _ = new_constant("terminal", “: object”)
 
-val _ = new_axiom("terminal_def", “∀A. is_terminal A ⇔
-                                       ∀X. ∃!tx. dom tx = X ∧ cod tx = A”)
+val _ = new_constant("mterminal", “: object -> arrow”)    
 
-val _ = new_constant("terminal", “:object”)
+val _ = new_axiom("terminal_diag", “∀X. dom (mterminal X) = X ∧
+                                        cod (mterminal X) = terminal”)
 
-val _ = new_axiom("terminal_exists", “is_terminal terminal”)    
+val _ = new_axiom("mterminal_unique",
+                  “∀f g. dom f = dom g ∧ cod f = cod g ∧ cod g = terminal ⇒
+                         f = g”)                                        
+
 (* mono *)
 
-val _ = new_constant("mono", “:arrow -> bool”)
+val _ = new_constant("is_mono", “:arrow -> bool”)
 
-val _ = new_axiom("mono_def",
+val _ = new_axiom("is_mono_def",
                   “∀f. is_mono f ⇔
                   ∀g1 g2. dom g1 = dom g2 ∧ cod g1 = cod g2 ∧ cod g2 = dom f ∧
                           g1 o f = g2 o f ⇒ g1 = g2”)                                                                                                                    
 (*subobject classifier + truth map*)
 
-val _ = new_constant("is_sct", “:arrow -> bool”)            
-                        
-val _ = new_axiom("sct_def",
-                 “is_sct true0 ⇔
-                 ∃t. is_terminal t ∧ dom true = t ∧ is_mono true0 ∧
-                 ∀m. is_mono m ⇒
-                     ∃!phi j. is_pullback phi true0 (dom m) m j 
-                 ”)
-val _ = new_constant("true", “:arrow”)
-val _ = new_constant("omega", “: object”)
+            
+val _ = new_constant("omega", “:object”)
 
-val _ = new_axiom("sct_exists", “is_sct true ∧ dom true = t ∧ cod true = omega”)
-    
+val _ = new_constant("true", “: arrow”)
+
+val _ = new_axiom("true_diag", “dom true = terminal ∧ cod true = omega”)
+
+val _ = new_constant("char", “:arrow -> arrow”)
+
+
+val _ = new_axiom("char_diag",
+                 “∀m. is_mono_m ⇒ dom (char m) = cod m ∧ cod (char m) = omega”)    
+val _ = new_axiom("omega_char_sc",
+                 “∀m. is_mono m ⇒
+                      true o (mterminal (dom m)) = (char m) o m ∧
+                      (∀X x1 x2.
+                        dom x1 = X ∧ dom x2 = X ∧
+                        cod x1 = cod m ∧ cod x2 = terminal ∧
+                        x1 o (char m) = x2 o true ⇒
+                        ∃!u. dom u = X ∧ cod u = dom m ∧
+                        x1 = m o u ∧ x2 = (mterminal (dom m)) o u)
+                      ”)    
+
 (*power object*)
 
-val _ = new_axiom("power_def",
-                  “∀B A f. dom f = prod B A ∧ cod f = omega ⇒
-                  ∃!g. dom g = A ∧ cod g = PB ∧
-                       f = ev B o prod_ar (pr1 B A) (g o (pr2 B A))”)
+val _ = new_constant("pow", “: object -> object”)
 
+val _ = new_constant("mem", “: object -> arrow”)
 
+val _ = new_constant("transpose", “: arrow -> arrow”)    
 
+val _ = new_axiom("transpose_diag",
+                 “∀f B A. dom f = prod_obj B A ∧ cod f = omega ⇒
+                          dom (transpose f) = A ∧ cod (transpose f) = pow B ∧
+                          (mem B) o (prod_ars (p1 B A) ((transpose f) o (p2 B A))) = f”)                
 
-val _ = new_constant("pobj", “:object -> object”)
-
-val _ = new_constant("ev", “:object -> arrow”)
-
+val _ = new_axiom("transpose_unique",
+                 “∀f B A g. dom f = prod_obj B A ∧ cod f = omega ∧
+                          dom g = A ∧ cod g = pow B ∧
+                          (mem B) o (prod_ars (p1 B A) (g o (p2 B A))) = f ⇒
+                          g = transpose f”)
 
