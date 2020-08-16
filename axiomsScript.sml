@@ -145,11 +145,16 @@ val _ = new_constant("transpose", “: arrow -> arrow”)
 val _ = new_axiom("transpose_diag",
                  “∀f B A. dom f = prod_obj B A ∧ cod f = omega ⇒
                           dom (transpose f) = A ∧ cod (transpose f) = pow B ∧
-                          (mem B) o (prod_ars (p1 B A) ((transpose f) o (p2 B A))) = f”)                
+                          (mem B) o (prod_ar (p1 B A) ((transpose f) o (p2 B A))) = f”)                
 
 val _ = new_axiom("transpose_unique",
                  “∀f B A g. dom f = prod_obj B A ∧ cod f = omega ∧
                           dom g = A ∧ cod g = pow B ∧
-                          (mem B) o (prod_ars (p1 B A) (g o (p2 B A))) = f ⇒
+                          (mem B) o (prod_ar (p1 B A) (g o (p2 B A))) = f ⇒
                           g = transpose f”)
+                       
 
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
+                  fixity = Closefix, 
+                  pp_elements = [TOK "⟨", TM, TOK ",",TM, TOK "⟩"], 
+                  term_name = "prod_ar", paren_style = OnlyIfNecessary}
