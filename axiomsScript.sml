@@ -80,7 +80,8 @@ val pullback_up = new_axiom("pullback_up",
 (*define in that way so rw etc will use def to decompose a map as factors through certain objects*)      
 
 Definition is_pullback_def:
-is_pullback f g (pb1, pb2) ⇔ f o pb1 = g o pb2 ∧
+is_pullback f g (pb1, pb2) ⇔ cod f = cod g ∧ dom pb1 = dom pb2 ∧ cod pb1 = dom f ∧
+                             cod pb2 = dom g ∧ f o pb1 = g o pb2 ∧
                              (∀x1 x2. dom x1 = dom x2 ∧ cod x1 = dom f ∧ cod x2 = dom g ∧
                                       f o x1 = g o x2 ⇒
                                       ∃!u. dom u = dom x2 ∧ cod u = dom pb2 ∧
@@ -154,7 +155,7 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   term_name = "product_induce", paren_style = OnlyIfNecessary}
 
 Definition is_iso_def:
-is_iso f ⇔ (∃f'. dom f' = cod f ∧ cod f = dom f ∧ f o f' = id (cod f) ∧ f' o f = id (dom f))
+is_iso f ⇔ (∃f'. dom f' = cod f ∧ cod f' = dom f ∧ f o f' = id (cod f) ∧ f' o f = id (dom f))
 End
 
         
@@ -174,21 +175,90 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
 
 
 (*char required for this part,transpose required for this part*)
-  
+
+Theorem product_with_terminal:
+∀B. is_iso (FST (product B terminal))
+Proof
+rw[is_iso_def,product_up] >> qexists_tac ‘⟨id B, X2t B⟩’ >> rw[] (* 4 *)
+>- metis_tac[product_induce_def,id1,X2t_def]
+>- metis_tac[product_induce_def,id1,X2t_def]
+>- metis_tac[product_induce_def,id1,X2t_def]
+>- (‘dom (id (B x terminal)) = dom (SND (product B terminal)) ∧
+    cod (id (B x terminal)) = (B x terminal) ∧
+    FST (product B terminal) = FST (product B terminal) ∘ (id (B x terminal)) ∧
+    SND (product B terminal) = SND (product B terminal) ∘ (id (B x terminal)) ∧
+    
+    dom (⟨id B,X2t B⟩ ∘ FST (product B terminal)) = dom (SND (product B terminal)) ∧
+    cod (⟨id B,X2t B⟩ ∘ FST (product B terminal)) = (B x terminal) ∧
+    FST (product B terminal) = FST (product B terminal) ∘ (⟨id B,X2t B⟩ ∘ FST (product B terminal))∧
+    SND (product B terminal) = SND (product B terminal) ∘ (⟨id B,X2t B⟩ ∘ FST (product B terminal))’ suffices_by
+    (‘dom (FST (product B terminal)) = dom (SND (product B terminal)) ∧
+    cod (FST (product B terminal)) = B ∧
+    cod (SND (product B terminal)) = terminal’ by metis_tac[product_up] >>
+    ‘∃!u.
+                 dom u = dom (SND (product B terminal)) ∧ cod u = (B x terminal) ∧
+                 (FST (product B terminal)) = FST (product B terminal) ∘ u ∧
+                 (SND (product B terminal)) = SND (product B terminal) ∘ u’ by fs[product_up] >>
+     metis_tac[EXISTS_UNIQUE_THM]) >> 
+    simp[product_induce_def,id1,X2t_def,idL,idR,idL] >>
+    ‘dom (FST (product B terminal)) = (B x terminal) ∧
+    cod ⟨id B,X2t B⟩ = (B x terminal) ∧
+    dom ⟨id B,X2t B⟩ = B ∧ cod (FST (product B terminal)) = B’
+    by fs[product_up,product_induce_def,id1,X2t_def] >>
+    rw[] (* 4 *)
+    >- metis_tac[compose]
+    >- metis_tac[compose]
+    >- (‘FST (product B terminal) ∘ ⟨id B,X2t B⟩ ∘ FST (product B terminal) =
+        (FST (product B terminal) ∘ ⟨id B,X2t B⟩) ∘ FST (product B terminal)’
+         suffices_by 
+         (rw[] >>
+         ‘FST (product B terminal) ∘ ⟨id B,X2t B⟩ = id B’ by fs[product_induce_def,id1,X2t_def] >>
+         rw[idL]) >>
+       ‘(FST (product B terminal) ∘ ⟨id B,X2t B⟩) ∘ FST (product B terminal) =
+        FST (product B terminal) ∘ ⟨id B,X2t B⟩ ∘ FST (product B terminal)’
+        suffices_by metis_tac[] >> irule compose_assoc >>
+        fs[product_induce_def,id1,X2t_def])
+     >- (‘dom (SND (product B terminal)) =
+         dom (SND (product B terminal) ∘ ⟨id B,X2t B⟩ ∘ FST (product B terminal)) ∧
+         cod (SND (product B terminal)) = terminal ∧
+         cod (SND (product B terminal) ∘ ⟨id B,X2t B⟩ ∘ FST (product B terminal)) = terminal’
+         suffices_by
+          (rw[] >>
+          ‘∃!u. dom u = (B x terminal) ∧ cod u = terminal’ by metis_tac[terminal_def] >>
+          fs[EXISTS_UNIQUE_THM]) >>
+         rw[] (* 3 *) >>
+         fs[product_induce_def,id1,X2t_def,compose]))
+QED
+        
+metis_tac[compose_assoc]
+    ‘dom (FST (product B terminal)) = (B x terminal) ∧ cod (FST (product B terminal)) = B’
+    by metis_tac[product_up]  ∧
+     cod (SND (product A B)) = B ∧
+     ∀f g.
+             dom f = dom g ∧ cod f = A ∧ cod g = B ⇒
+             ∃!u.
+                 dom u = dom g ∧ cod u = (A x B) ∧
+                 f = FST (product A B) ∘ u ∧ g = SND (product A B) ∘ u’
+    metis_tac[product_induce_def,product_up,id1,X2t_def,EXISTS_UNIQUE_THM]
+
+              
 Theorem singleton_is_mono:
 ∀B. is_mono (transpose (char (product_induce (id B) (id B))))
 Proof
 cheat
 QED
 
-val _ = clear_overloads_on "×";
+val _ = clear_overloads_on "x";
         
 Overload product_obj = “λA B. dom (SND (product A B))”
 val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   fixity = Infix (NONASSOC,450), 
                   pp_elements = [TOK "×"], 
                   term_name = "product_obj", paren_style = OnlyIfNecessary}     
-        
+
+
+(*need lemma pullback of mono is mono*)
+                  
 Theorem exponential_exists:
 ∀B C. ∃B2C e.
         dom e = dom (SND (product B B2C)) ∧ cod e = C ∧
@@ -216,7 +286,9 @@ qexists_tac ‘e’ >> rpt strip_tac
 metis_tac[] cheat
 
 (*two nontrivial ones*)
->- 
+>- ‘σ o f' = σ o (e ∘ ⟨FST (product B A),g ∘ SND (product B A)⟩) ∧
+    σ o f' = σ o (e ∘ ⟨FST (product B A),g' ∘ SND (product B A)⟩)’ by metis_tac[] >>
+   ‘’
 
 
                   
