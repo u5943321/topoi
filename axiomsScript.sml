@@ -268,6 +268,53 @@ rw[is_mono_def] >>
   ‘dom ⟨id B,id B⟩ = B’ by metis_tac[id1,product_induce_def] >> metis_tac[idL]) >>
 metis_tac[id1,product_induce_def] 
 QED
+
+Theorem product_component_eq:
+∀A B p q. dom p = dom q ∧ cod p = (A x B) ∧ cod q = (A x B) ∧
+          (FST (product A B)) o p = (FST (product A B)) o q ∧
+          (SND (product A B)) o p = (SND (product A B)) o q ⇒
+          p = q
+Proof
+rw[] >>
+‘dom (FST (product A B) ∘ p) = dom p ∧ dom (SND (product A B) ∘ p) = dom p ∧
+cod (FST (product A B) ∘ p) = A ∧ cod (SND (product A B) ∘ p) = B’
+by fs[product_induce_def,compose] >>
+‘dom (FST (product A B) ∘ p) = dom (SND (product A B) ∘ p)’ by metis_tac[] >>
+drule (product_up|> SPEC_ALL |> CONJUNCT2 |> CONJUNCT2 |> CONJUNCT2) >> rw[] >>
+metis_tac[EXISTS_UNIQUE_THM]
+QED
+   
+
+Theorem distribute_pullback:
+∀b. is_pullback ⟨FST (product (cod b) (dom b)), b o (SND (product (cod b) (dom b)))⟩
+            ⟨id (cod b), id (cod b)⟩
+            (⟨b, id (dom b)⟩,b)
+Proof
+strip_tac >>
+qabbrev_tac ‘X = dom b’ >> qabbrev_tac ‘B = cod b’ >>
+simp[is_pullback_def,product_induce_def,id1,compose] >> strip_tac (* 2 *)
+>- (‘cod ⟨id (cod b),id (cod b)⟩ = ((cod b) x (cod b))’
+     by fs[product_induce_def,id1] >>
+   ‘cod ⟨FST (product B X),b ∘ SND (product B X)⟩ = ((cod b) x (cod b))’
+     suffices_by metis_tac[] >>
+   ‘dom (FST (product B X)) = dom (b ∘ SND (product B X)) ∧
+    cod (FST (product B X)) = cod b ∧
+    cod (b ∘ SND (product B X)) = cod b’ suffices_by metis_tac[product_induce_def] >>
+    fs[product_induce_def,compose])
+>- strip_tac >>
+   
+      (‘cod (id (cod b)) = cod b ∧ cod (id (cod b)) = cod b’ suffices_by metis_tac[product_induce_def])
+  
+‘dom (FST (product (cod b) (dom b))) = ((cod b) x (dom b)) ∧
+dom (b ∘ SND (product (cod b) (dom b))) = ((cod b) x (dom b)) ∧
+cod (b ∘ SND (product (cod b) (dom b))) = cod b’
+by
+ metis_tac[product_induce_def,compose] >>
+drule (product_induce_def|> SPEC_ALL |> CONJUNCT2 |> CONJUNCT2 |> CONJUNCT2) >>
+rw[]
+
+‘dom (FST (product A B)) = (A x B) ∧ cod (FST (product A B)) = A ∧
+ cod (SND (product A B)) = B’
               
 Theorem singleton_is_mono:
 ∀B. is_mono (transpose (char (product_induce (id B) (id B))))
