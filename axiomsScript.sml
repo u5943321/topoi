@@ -230,17 +230,27 @@ rw[is_iso_def,product_up] >> qexists_tac ‘⟨id B, X2t B⟩’ >> rw[] (* 4 *)
          fs[product_induce_def,id1,X2t_def,compose]))
 QED
         
-metis_tac[compose_assoc]
-    ‘dom (FST (product B terminal)) = (B x terminal) ∧ cod (FST (product B terminal)) = B’
-    by metis_tac[product_up]  ∧
-     cod (SND (product A B)) = B ∧
-     ∀f g.
-             dom f = dom g ∧ cod f = A ∧ cod g = B ⇒
-             ∃!u.
-                 dom u = dom g ∧ cod u = (A x B) ∧
-                 f = FST (product A B) ∘ u ∧ g = SND (product A B) ∘ u’
-    metis_tac[product_induce_def,product_up,id1,X2t_def,EXISTS_UNIQUE_THM]
+Theorem dom_terminal_mono:
+∀f. dom f = terminal ⇒ is_mono f
+Proof
+rw[is_mono_def] >> metis_tac[terminal_def]
+QED
 
+Theorem pullback_mono_mono:
+∀m. is_mono m ⇒ ∀f pb1 pb2. is_pullback f m (pb1, pb2) ⇒ is_mono pb1
+Proof
+rw[is_pullback_def,is_mono_def] >>
+‘f o pb1 o g1 = f o pb1 o g2’ by simp[] >>
+‘f o pb1 o g1 = (f o pb1) o g1 ∧ f o pb1 o g2 = (f o pb1) o g2’ by metis_tac[compose_assoc] >>
+‘(m o pb2) o g1 = (m o pb2) o g2’ by metis_tac[] >>
+rfs[compose_assoc] >> ‘pb2 ∘ g1 = pb2 ∘ g2’ by metis_tac[compose] >>
+first_x_assum (qspecl_then [‘pb1 o g1’,‘pb2 o g1’] mp_tac) >> rw[compose] >>
+‘f ∘ pb1 ∘ g2 = (f ∘ pb1) ∘ g2 ∧
+ m ∘ pb2 ∘ g2 = (m ∘ pb2) ∘ g2’
+ by fs[compose_assoc] >>
+‘f ∘ pb1 ∘ g2 = m ∘ pb2 ∘ g2’ by metis_tac[] >> fs[] >>
+metis_tac[EXISTS_UNIQUE_THM]
+QED       
               
 Theorem singleton_is_mono:
 ∀B. is_mono (transpose (char (product_induce (id B) (id B))))
