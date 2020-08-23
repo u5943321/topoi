@@ -250,7 +250,24 @@ first_x_assum (qspecl_then [‘pb1 o g1’,‘pb2 o g1’] mp_tac) >> rw[compose
  by fs[compose_assoc] >>
 ‘f ∘ pb1 ∘ g2 = m ∘ pb2 ∘ g2’ by metis_tac[] >> fs[] >>
 metis_tac[EXISTS_UNIQUE_THM]
-QED       
+QED
+
+
+Theorem diagonal_is_mono:
+∀B. is_mono ⟨id B, id B⟩
+Proof
+rw[is_mono_def] >>
+‘(FST (product B B)) o (⟨id B,id B⟩ o g1) = (FST (product B B)) o (⟨id B,id B⟩ o g2)’ by simp[] >>
+‘dom (id B) = B’ by simp[id1] >>
+‘(FST (product B B)) o ⟨id B,id B⟩ = id B’
+ suffices_by
+ (‘(FST (product B B)) o (⟨id B,id B⟩ o g1) = ((FST (product B B)) o ⟨id B,id B⟩) o g1 ∧
+   (FST (product B B)) o (⟨id B,id B⟩ o g2) = ((FST (product B B)) o ⟨id B,id B⟩) o g2’
+   by fs[product_induce_def,compose_assoc,id1,compose] >>
+  rw[] >> ‘(id B) o g1 = (id B) o g2’ by metis_tac[] >>
+  ‘dom ⟨id B,id B⟩ = B’ by metis_tac[id1,product_induce_def] >> metis_tac[idL]) >>
+metis_tac[id1,product_induce_def] 
+QED
               
 Theorem singleton_is_mono:
 ∀B. is_mono (transpose (char (product_induce (id B) (id B))))
