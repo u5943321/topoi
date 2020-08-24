@@ -532,11 +532,54 @@ qexists_tac ‘⟨b,id X⟩’ >> fs[] >>
 irule product_induce_is_mono >>
 simp[] >> metis_tac[id_is_mono]
 QED
-              
+
+Theorem pullback_side_by_side:
+is_pullback a b (e,f) ∧ is_pullback c d (b,g) ⇒
+is_pullback (c o a) d (e, g o f)
+Proof
+simp[is_pullback_def] >> strip_tac >>
+‘c ∘ b ∘ f = (c o b) o f ∧ d o g o f = (d o g) o f’ by simp[] >>
+‘∀x1 x2. dom x1 = dom x2 ∧ cod x1 = dom a ∧ cod x2 = dom d ∧
+         (c ∘ a) ∘ x1 = d ∘ x2 ⇒
+        ∃!u. dom u = dom x2 ∧ cod u = dom f ∧ x1 = e ∘ u ∧
+             x2 = (g ∘ f) ∘ u’ suffices_by metis_tac[] >>
+rpt strip_tac >>
+first_x_assum (qspecl_then [‘a o x1’,‘x2’] mp_tac) >>
+simp[] >> ‘(c ∘ a) ∘ x1 = c o a o x1’ by (irule compose_assoc >> simp[]) >>
+fs[] >> simp[EXISTS_UNIQUE_ALT] >> rpt strip_tac >>
+last_x_assum (qspecl_then [‘x1’,‘u’] mp_tac) >> simp[] >>
+‘dom x2 = dom u ∧ cod u = dom g ∧ a ∘ x1 = b ∘ u’ by metis_tac[] >>
+rw[EXISTS_UNIQUE_ALT] >> qexists_tac ‘u'’ >> simp[EQ_IMP_THM] >>
+gen_tac >>
+‘dom u' = dom u ∧ cod u' = dom f ∧ x1 = e ∘ u'’ by metis_tac[] >>
+‘x2 = g ∘ u’ by metis_tac[] >>
+‘u = f o u'’ by metis_tac[] >>
+‘(g o f) o u' = g o f o u'’ by fs[] >>
+‘dom u'' = dom u ∧ cod u'' = dom f ∧ x1 = e ∘ u'' ∧ x2 = (g ∘ f) ∘ u'' ⇒
+ u' = u''’ suffices_by metis_tac[] >> rpt strip_tac >>
+‘u = f o u''’ suffices_by metis_tac[] >>
+‘dom (f o u'') = dom x2 ∧ cod (f o u'') = dom g ∧ a ∘ x1 = b ∘ (f o u'') ∧ x2 = g ∘ (f o u'')’
+  suffices_by metis_tac[] >>
+‘(g ∘ f) ∘ u'' = g ∘ f ∘ u''’ by (irule compose_assoc >> metis_tac[]) >>
+‘a ∘ x1 = b ∘ f ∘ u''’ suffices_by fs[] >>
+‘b ∘ f ∘ u'' = (b ∘ f) ∘ u''’ by fs[] >>
+‘(b ∘ f) ∘ u'' = (a o e) o u''’ by metis_tac[]  >>
+‘(a ∘ e) ∘ u'' = a o e o u''’ by fs[] >>
+fs[]
+QED
+
+
+
+
+by (irule fs[compose_assoc] >> simp[])
+
+  
+
+        
 Theorem singleton_is_mono:
 ∀B. is_mono (transpose (char (product_induce (id B) (id B))))
 Proof
-cheat
+
 QED
 
 val _ = clear_overloads_on "x";
