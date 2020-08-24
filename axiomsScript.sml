@@ -456,6 +456,73 @@ simp[] >>
 rpt strip_tac >> simp[EXISTS_UNIQUE_ALT] >>
 qexists_tac ‘(SND (product B X)) o x1’ >>
 ‘dom (SND (product B X) ∘ x1) = dom x2 ∧ cod (SND (product B X) ∘ x1) = X ∧
+ x1 = ⟨b,id X⟩ ∘ (SND (product B X) ∘ x1) ∧ x2 = b ∘ (SND (product B X) ∘ x1) ∧
+ (∀u'. dom u' = dom x2 ∧ cod u' = X ∧ x1 = ⟨b,id X⟩ ∘ u' ∧ x2 = b ∘ u' ⇒
+       SND (product B X) ∘ x1 = u')’
+suffices_by metis_tac[] >> fs[] >>
+‘x1 = ⟨b,id X⟩ ∘ SND (product B X) ∘ x1’ by
+(irule product_component_eq >> simp[] >> map_every qexists_tac [‘B’,‘X’] >>
+fs[] >>
+‘FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 =
+ (FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X)) ∘ x1’ by fs[] >>
+‘(FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X)) =
+ (FST (product B X) ∘ ⟨b,id X⟩) ∘ SND (product B X)’ by fs[] >>
+‘(FST (product B X) ∘ ⟨b,id X⟩) = b’ by fs[] >>
+‘FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 =
+ (b o (SND (product B X))) o x1’ by metis_tac[] >>
+‘FST (product B X) ∘ x1  = (b ∘ SND (product B X)) ∘ x1 ∧
+ SND (product B X) ∘ x1 =
+ SND (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1’
+suffices_by metis_tac[] >>
+‘FST (product B X) ∘ x1 = x2 ∧
+(b ∘ SND (product B X)) ∘ x1 = x2’
+  by
+   (‘(SND (product B B)) o ⟨id B,id B⟩ ∘ x2 =
+    ((SND (product B B)) o ⟨id B,id B⟩) ∘ x2’ by fs[] >>
+    ‘((SND (product B B)) o ⟨id B,id B⟩) = (id B)’ by fs[] >>
+    ‘((SND (product B B)) o ⟨id B,id B⟩) ∘ x2 = (id B) o x2’ by metis_tac[] >>
+    ‘(SND (product B B)) o ⟨id B,id B⟩ ∘ x2 = x2’ by metis_tac[idL] >>
+    ‘(SND (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩ ∘ x1 =
+     ((SND (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩) ∘ x1’
+      by fs[] >>
+    ‘(SND (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩ =
+      b ∘ SND (product B X)’ by fs[] >>
+    ‘(SND (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩ ∘ x1 =
+     (b ∘ SND (product B X)) o x1’ by metis_tac[] >>
+    ‘FST (product B X) ∘ x1 = x2’ suffices_by metis_tac[] >>
+    ‘(FST (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩ ∘ x1 =
+    ((FST (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩) ∘ x1’
+     by fs[] >>
+    ‘(FST (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩ =
+    FST (product B X)’ by fs[] >>
+    ‘(FST (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩ ∘ x1 =
+    FST (product B X) o x1’ by metis_tac[] >>
+    ‘(FST (product B B)) o ⟨id B,id B⟩ ∘ x2 =
+     (FST (product B B) o ⟨id B,id B⟩) ∘ x2’ by fs[] >>
+    ‘(FST (product B B) o ⟨id B,id B⟩) = id B’ by fs[] >>
+    metis_tac[idL]) >>
+(*done with half of the conjunction*)    
+‘SND (product B X) ∘ x1 =
+ SND (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1’
+ suffices_by metis_tac[] >>
+
+ 
+
+
+
+
+
+
+
+ 
+‘⟨FST (product B X),b ∘ SND (product B X)⟩ ∘ x1 = ⟨id B,id B⟩ ∘ x2’
+
+ 
+‘(FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X)) ∘ x1 =
+ ((FST (product B X) ∘ ⟨b,id X⟩) ∘ SND (product B X)) ∘ x1’ by fs[])
+
+            
+‘dom (SND (product B X) ∘ x1) = dom x2 ∧ cod (SND (product B X) ∘ x1) = X ∧
  x1 = ⟨b,id X⟩ ∘ (SND (product B X) ∘ x1) ∧ x2 = b ∘ (SND (product B X) ∘ x1) /\
  is_mono ⟨b,id X⟩’
  strip_tac >>
