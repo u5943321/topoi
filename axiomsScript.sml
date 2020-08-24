@@ -11,7 +11,7 @@ Overload "o" = ``arrow_compose``
 
 (*identity*)         
 
-val id1 = new_axiom("id1", ``!X. dom (id X) = X ∧ cod (id X) = X``)
+val id1 = new_axiom("id1", ``!X. dom (id X) = X ∧ cod (id X) = X``) 
 
 val idL = new_axiom("idL", ``!X a. cod a = X ==> (id X) o a = a``);
 
@@ -353,6 +353,9 @@ Proof
 rw[compose]
 QED
 
+
+        
+
 Theorem is_mono_applied:
 ∀f.
          is_mono f ==>
@@ -362,13 +365,29 @@ Theorem is_mono_applied:
              g1 = g2
 Proof
 metis_tac[is_mono_def]
-QED                 
+QED
+
+Theorem product_induce_is_mono:
+!f g. dom f = dom g /\ is_mono g ==> is_mono ⟨f,g⟩
+Proof
+rw[is_mono_def] >>
+first_x_assum irule >> fs[product_induce_def] >>
+‘(SND (product (cod f) (cod g))) o ⟨f,g⟩ ∘ g1  = (SND (product (cod f) (cod g))) o ⟨f,g⟩ ∘ g2’
+ by metis_tac[] >>
+‘SND (product (cod f) (cod g)) ∘ ⟨f,g⟩ ∘ g1 = g o g1 /\
+SND (product (cod f) (cod g)) ∘ ⟨f,g⟩ ∘ g2 = g o g2’ suffices_by metis_tac[] >>
+strip_tac (* 2 *) >> irule product_SND_compose_alt >>
+fs[product_induce_def]
+QED        
 
 Theorem distribute_pullback:
 ∀b. is_pullback ⟨FST (product (cod b) (dom b)), b o (SND (product (cod b) (dom b)))⟩
             ⟨id (cod b), id (cod b)⟩
             (⟨b, id (dom b)⟩,b)
 Proof
+
+
+        
 strip_tac >>
 qabbrev_tac ‘X = dom b’ >> qabbrev_tac ‘B = cod b’ >>
 simp[is_pullback_def,product_induce_def,id1,compose] >>
@@ -483,7 +502,31 @@ qexists_tac ‘(SND (product B X)) o x1’ >>
       by
        (irule product_SND_compose_alt >> fs[compose,id1,product_induce_def,Abbr‘B’,Abbr‘X’]) >>
     ‘x1 = ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 /\ is_mono ⟨b,id X⟩’ suffices_by metis_tac[] >>
-    fs[] >>
+    fs[] >> strip_tac (* 2 *)
+    >- irule product_component_eq
+       ‘dom (⟨b,id X⟩ ∘ SND (product B X) ∘ x1) = dom x1’
+         by simp[compose,compose_assoc,id1,product_induce_def] >>
+       simp[] >>
+       map_every qexists_tac [‘B’,‘X’] >> fs[] >>
+       simp[compose,compose_assoc,id1,product_induce_def] >>
+       ‘SND (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 = (id X) o SND (product B X) ∘ x1’
+         by
+          (irule product_SND_compose_alt >> simp[compose,compose_assoc,id1,product_induce_def]) >>
+       fs[idL] >>
+       ‘FST (product B X) = (FST (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩’
+         by simp[compose,product_induce_def] >>
+       ‘FST (product B X) ∘ x1  =
+        (FST (product B B) ∘ ⟨FST (product B X),b ∘ SND (product B X)⟩) ∘
+        ⟨b,id X⟩ ∘ SND (product B X) ∘ x1’
+         suffices_by metis_tac[] >>
+       ‘(FST (product B X)) o x1 = x2’ by cheat >>
+       ‘FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 = x2’ suffices_by metis_tac[] >>
+       ‘FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 = x2’
+       
+
+
+
+    
     ‘(FST ()) o ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 ’
 
 
