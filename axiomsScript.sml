@@ -568,13 +568,18 @@ gen_tac >>
 fs[]
 QED
 
-
-
-
-by (irule fs[compose_assoc] >> simp[])
-
-  
-
+Theorem lemma1_paste:
+∀b. is_pullback  ((char ⟨id (cod b),id (cod b)⟩) o
+                 ⟨FST (product (cod b) (dom b)),b ∘ SND (product (cod b) (dom b))⟩)
+                 true
+                 (⟨b,id (dom b)⟩,(X2t (cod b)) o b)       
+Proof
+rw[] >> irule pullback_side_by_side >> qexists_tac ‘⟨id (cod b),id (cod b)⟩’ >> rw[] (* 2 *)
+>- metis_tac[distribute_pullback] >>
+‘is_mono ⟨id (cod b),id (cod b)⟩’
+  by metis_tac[product_induce_is_mono,id_is_mono] >>
+drule char_def >> rw[]
+QED
         
 Theorem singleton_is_mono:
 ∀B. is_mono (transpose (char (product_induce (id B) (id B))))
