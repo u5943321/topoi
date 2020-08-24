@@ -391,6 +391,12 @@ strip_tac (* 2 *) >> irule product_SND_compose_alt >>
 fs[product_induce_def]
 QED        
 
+Theorem id_is_mono:
+∀X. is_mono (id X)
+Proof           
+rw[is_mono_def] >> metis_tac[idL]
+QED
+           
 Theorem distribute_pullback:
 ∀b. is_pullback ⟨FST (product (cod b) (dom b)), b o (SND (product (cod b) (dom b)))⟩
             ⟨id (cod b), id (cod b)⟩
@@ -399,7 +405,7 @@ Proof
 strip_tac >>
 qabbrev_tac ‘X = dom b’ >> qabbrev_tac ‘B = cod b’ >>
 simp[is_pullback_def,product_induce_def,id1,compose] >>
-‘cod ⟨FST (product B X),b ∘ SND (product B X)⟩ = cod ⟨id B,id B⟩’cheat
+‘cod ⟨FST (product B X),b ∘ SND (product B X)⟩ = cod ⟨id B,id B⟩’
   by metis_tac[id1,compose,product_induce_def] >>
      (*okay, but I have to wait for ages.*)
 (*
@@ -515,123 +521,17 @@ metis_tac[]) >>
   (irule compose_assoc >> rw[Abbr‘X’]) >>
 fs[] >>
 (*only remains the mono part*)
-
- 
-
-
-
-
-
-
-
- 
-‘⟨FST (product B X),b ∘ SND (product B X)⟩ ∘ x1 = ⟨id B,id B⟩ ∘ x2’
-
- 
-‘(FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X)) ∘ x1 =
- ((FST (product B X) ∘ ⟨b,id X⟩) ∘ SND (product B X)) ∘ x1’ by fs[])
-
-            
-‘dom (SND (product B X) ∘ x1) = dom x2 ∧ cod (SND (product B X) ∘ x1) = X ∧
- x1 = ⟨b,id X⟩ ∘ (SND (product B X) ∘ x1) ∧ x2 = b ∘ (SND (product B X) ∘ x1) /\
- is_mono ⟨b,id X⟩’
- strip_tac >>
- ‘dom ⟨b,id X⟩ = X /\ cod ⟨b,id X⟩ = (B x X)’ by fs[Abbr‘B’,Abbr‘X’,product_induce_def,id1] >>
-‘dom (SND (product B X) ∘ x1) = dom x2 ∧ cod (SND (product B X) ∘ x1) = X ∧
- x1 = ⟨b,id X⟩ ∘ (SND (product B X) ∘ x1) ∧ x2 = b ∘ (SND (product B X) ∘ x1) /\
- (∀u'.
-            dom u' = dom x2 ∧ cod u' = X ∧ x1 = ⟨b,id X⟩ ∘ u' ∧ x2 = b ∘ u' ==>
-            SND (product B X) ∘ x1 = u')’
-   suffices_by metis_tac[] >>
-   rpt strip_tac >>
-
-
-
-   ‘dom (SND (product B X) ∘ x1) = dom x2 ∧
-        cod (SND (product B X) ∘ x1) = X ∧
-        x1 = ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 ∧
-        x2 = b ∘ SND (product B X) ∘ x1 ’ by cheat  >>
-        fs[] >> rpt strip_tac >>
-        irule is_mono_applied >>
-    ‘dom (SND (product B X) ∘ ⟨b,id X⟩ ∘ u') = dom u'’ by cheat >> simp[]
-    qexists_tac ‘⟨b,id X⟩’ >> fs[] >>
-    ‘dom (SND (product B X) ∘ x1) = dom x1’ by metis_tac[product_induce_def,compose] >>
-    ‘cod (SND (product B X) ∘ x1) = X’ by metis_tac[product_induce_def,compose] >>
-    ‘(SND (product B B))o ⟨FST (product B X),b ∘ SND (product B X)⟩ ∘ x1 =
-     (SND (product B B)) o ⟨id B,id B⟩ ∘ x2’ by metis_tac[] >>
-    ‘(SND (product B B)) o ⟨id B,id B⟩ ∘ x2 = ((SND (product B B)) o ⟨id B,id B⟩) ∘ x2’
-       by fs[compose_assoc,id1,product_induce_def] >>
-    ‘(SND (product B B) ∘ ⟨id B,id B⟩) = id B’ by fs[id1,product_induce_def] >>
-    ‘SND (product B B) ∘ ⟨FST (product B X),b ∘ SND (product B X)⟩ ∘ x1 = x2’
-      by metis_tac[idL] >>
-    simp[] >> 
-    ‘b ∘ SND (product B X) ∘ x1 = (b ∘ SND (product B X)) ∘ x1’
-      by fs[compose_assoc,id1,product_induce_def] >> simp[]
-    ‘SND (product B B) ∘ ⟨FST (product B X),b ∘ SND (product B X)⟩ o x1 =
-     (b ∘ SND (product B X)) ∘ x1’
-      by
-       (irule product_SND_compose_alt >> fs[compose,id1,product_induce_def,Abbr‘B’,Abbr‘X’]) >>
-    ‘x1 = ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 /\ is_mono ⟨b,id X⟩’ suffices_by metis_tac[] >>
-    fs[] >> strip_tac (* 2 *)
-    >- irule product_component_eq
-       ‘dom (⟨b,id X⟩ ∘ SND (product B X) ∘ x1) = dom x1’
-         by simp[compose,compose_assoc,id1,product_induce_def] >>
-       simp[] >>
-       map_every qexists_tac [‘B’,‘X’] >> fs[] >>
-       simp[compose,compose_assoc,id1,product_induce_def] >>
-       ‘SND (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 = (id X) o SND (product B X) ∘ x1’
-         by
-          (irule product_SND_compose_alt >> simp[compose,compose_assoc,id1,product_induce_def]) >>
-       fs[idL] >>
-       ‘FST (product B X) = (FST (product B B)) o ⟨FST (product B X),b ∘ SND (product B X)⟩’
-         by simp[compose,product_induce_def] >>
-       ‘FST (product B X) ∘ x1  =
-        (FST (product B B) ∘ ⟨FST (product B X),b ∘ SND (product B X)⟩) ∘
-        ⟨b,id X⟩ ∘ SND (product B X) ∘ x1’
-         suffices_by metis_tac[] >>
-       ‘(FST (product B X)) o x1 = x2’ by cheat >>
-       ‘FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 = x2’ suffices_by metis_tac[] >>
-       ‘FST (product B X) ∘ ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 = x2’
-       
-
-
-
-    
-    ‘(FST ()) o ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 ’
-
-
-
-      
-    ‘SND (product B B) ∘ ⟨FST (product B X),b ∘ SND (product B X)⟩ o x1 =
-     b ∘ SND (product B X) ∘ x1 /\ x1 = ⟨b,id X⟩ ∘ SND (product B X) ∘ x1 /\ is_mono ⟨b,id X⟩’ 
-    suffices_by metis_tac[] >>
-    
-
-
-
-
-         
-     
-            
-
-
-metis_tac[product_induce_def,id1,Abbr‘X’,Abbr‘B’,id1]
-              
-            
-   
-      (‘cod (id (cod b)) = cod b ∧ cod (id (cod b)) = cod b’ suffices_by metis_tac[product_induce_def])
-  
-‘dom (FST (product (cod b) (dom b))) = ((cod b) x (dom b)) ∧
-dom (b ∘ SND (product (cod b) (dom b))) = ((cod b) x (dom b)) ∧
-cod (b ∘ SND (product (cod b) (dom b))) = cod b’
-by
- metis_tac[product_induce_def,compose] >>
-drule (product_induce_def|> SPEC_ALL |> CONJUNCT2 |> CONJUNCT2 |> CONJUNCT2 |> SPEC_ALL |>
-                            CONJUNCT2 ) >>
-rw[]
-
-‘dom (FST (product A B)) = (A x B) ∧ cod (FST (product A B)) = A ∧
- cod (SND (product A B)) = B’
+rpt strip_tac >> irule is_mono_applied >>
+‘dom (SND (product B X) ∘ ⟨b,id X⟩ ∘ u') = dom (⟨b,id X⟩ ∘ u')’
+  by fs[Abbr‘B’,Abbr‘X’] >>
+‘dom (⟨b,id X⟩ ∘ u') = dom u'’ by fs[Abbr‘B’,Abbr‘X’] >>
+‘∃f. is_mono f ∧ f ∘ SND (product B X) ∘ ⟨b,id X⟩ ∘ u' = f ∘ u' ∧
+     cod (SND (product B X) ∘ ⟨b,id X⟩ ∘ u') = dom f ∧ cod u' = dom f’
+ suffices_by metis_tac[] >> 
+qexists_tac ‘⟨b,id X⟩’ >> fs[] >>
+irule product_induce_is_mono >>
+simp[] >> metis_tac[id_is_mono]
+QED
               
 Theorem singleton_is_mono:
 ∀B. is_mono (transpose (char (product_induce (id B) (id B))))
