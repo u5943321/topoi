@@ -761,22 +761,20 @@ by
     transpose (char ⟨id B,id B⟩) ∘ g2 ∘ SND (product B X) =
     (transpose (char ⟨id B,id B⟩) ∘ g2) ∘SND (product B X)’ by fs[] >>
    metis_tac[]) >>
-
-    
-    
-    ‘dom (g1 ∘ SND (product (cod b) (dom b))) = dom (SND (product (cod b) (dom b)))’ by 
-     irule compose_dom >> rw[] (* 2 *)
-     >- ‘cod ⟨id (cod b),id (cod b)⟩ = ((cod b) x (cod b))’ by fs[] >>
-        ‘cod ⟨FST (product (cod b) (dom b)),g1 ∘ SND (product (cod b) (dom b))⟩ = ((cod b) x (cod b))’
-          simp[product_induce_def] >>
-        
-          by fs[]
-     ‘dom (char ⟨id (cod b),id (cod b)⟩ ∘
-           ⟨FST (product (cod b) (dom b)),g1 ∘ SND (product (cod b) (dom b))⟩) =
-      dom (g1 ∘ SND (product (cod b) (dom b)))’
-      by irule compose
-
-))
+‘is_pullback
+     (char ⟨id B,id B⟩ ∘
+     ⟨FST (product B X),g1 ∘ SND (product B X)⟩)
+     true (⟨g1,id X⟩,X2t B ∘ g1)’ by metis_tac[lemma1_paste] >>
+‘is_pullback
+     (char ⟨id B,id B⟩ ∘
+     ⟨FST (product B X),g2 ∘ SND (product B X)⟩)
+     true (⟨g2,id X⟩,X2t B ∘ g2)’ by metis_tac[lemma1_paste] >>
+‘is_pullback
+     (char ⟨id B,id B⟩ ∘ ⟨FST (product B X),g1 ∘ SND (product B X)⟩)
+     true (⟨g2,id X⟩,X2t B ∘ g2)’ by metis_tac[] >>
+‘∃h. dom h = dom ⟨g1,id X⟩ ∧ cod h = dom ⟨g2,id X⟩ ∧ ⟨g2,id X⟩ o h = ⟨g1,id X⟩’
+ by metis_tac[pullback_unique,EXISTS_UNIQUE_ALT] >>
+irule  product_right_compose_eq >> simp[] >> qexists_tac ‘h’ >> simp[]
 QED
 
 val _ = clear_overloads_on "x";
