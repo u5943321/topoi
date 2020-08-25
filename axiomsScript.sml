@@ -111,7 +111,7 @@ val terminal_def = new_axiom("terminal_def", “∀X. ∃!u. dom u = X ∧ cod u
 
 val X2t = new_constant("X2t", “:object -> arrow”)
 
-val X2t_def = new_axiom("X2t_def",“∀X. dom (X2t X) = X ∧ cod (X2t X) = terminal”)                                        
+val X2t_def = new_axiom("X2t_def",“∀X. dom (X2t X) = X ∧ cod (X2t X) = terminal”)                            val _ = export_rewrites["X2t_def"]               
 (* mono *)
 
 Definition is_mono_def:   
@@ -132,11 +132,17 @@ val true_def = new_axiom("true_def", “is_mono true ∧ dom true = terminal ∧
                                   ∃!char. dom char = cod m ∧ cod char = omega ∧
                                           is_pullback char true (m, (X2t (dom m)))”)
 
+Theorem true_itself[simp]:
+is_mono true ∧ dom true = terminal ∧ cod true = omega
+Proof
+rw[true_def]
+QED
+        
 val _ = new_constant("char", “:arrow -> arrow”)
 
 val char_def = new_axiom("char_def", “∀m. is_mono m ⇒
                                           dom (char m) = cod m ∧ cod (char m) = omega ∧
-                                          is_pullback (char m) true (m, (X2t (dom m)))”)                                              
+                                          is_pullback (char m) true (m, (X2t (dom m)))”)                     val _ = export_rewrites["char_def"]                           
 (*power object*)
 
 val _ = new_constant("pow", “: object -> object”)
@@ -150,7 +156,11 @@ val mem_def = new_axiom("mem_def",
                                     f = (mem B) o
                                         product_induce (FST (product B A))
                                                        (g o (SND (product B A))))”)    
-
+Theorem mem_itself[simp]:
+∀B. dom (mem B) = dom (SND (product B (pow B))) ∧ cod (mem B) = omega
+Proof
+rw[mem_def]
+QED
                        
 val _ = new_constant("transpose", “:arrow -> arrow”)
 
@@ -159,7 +169,10 @@ val transpose_def = new_axiom("transpose_def",
                                        dom (transpose f) = A ∧ cod (transpose f) = pow B ∧
                                        f = (mem B) o
                                         product_induce (FST (product B A))
-                                                       ((transpose f) o (SND (product B A))))”)    
+                                                       ((transpose f) o (SND (product B A))))”)
+
+val _ = export_rewrites["transpose_def"]
+                                                        
 val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   fixity = Closefix, 
                   pp_elements = [TOK "⟨", TM, TOK ",",TM, TOK "⟩"], 
@@ -351,14 +364,14 @@ Proof
 metis_tac[product_induce_def]
 QED
 
-Theorem compose_dom:
+Theorem compose_dom[simp]:
 ∀f g A. cod f = dom g ∧ dom f = A ⇒ dom (g ∘ f) = A
 Proof
 rw[compose]
 QED
 
 
-Theorem compose_cod:
+Theorem compose_cod[simp]:
 ∀f g B. cod f = dom g ∧ cod g = B ⇒ cod (g ∘ f) = B
 Proof
 rw[compose]
@@ -580,11 +593,174 @@ rw[] >> irule pullback_side_by_side >> qexists_tac ‘⟨id (cod b),id (cod b)�
   by metis_tac[product_induce_is_mono,id_is_mono] >>
 drule char_def >> rw[]
 QED
-        
+
+Theorem diagonal_is_mono[simp]:
+∀X. is_mono ⟨id X,id X⟩
+Proof
+metis_tac[id_is_mono,product_induce_is_mono]
+QED
+
+Theorem transpose_dom[simp]:
+∀B A f.
+         dom f = (B x A) ∧ cod f = omega ⇒
+         dom (transpose f) = A
+Proof
+metis_tac[transpose_def]
+QED
+
+Theorem product_one_component:
+∀B P Q R f g.
+ dom f = P ∧ cod f = Q ∧ dom g = Q ∧ cod g = R ⇒
+ ⟨FST (product B Q),g o (SND (product B Q))⟩ o ⟨FST (product B P),f o (SND (product B P))⟩ =
+ ⟨FST (product B P), g o f o (SND (product B P))⟩
+Proof
+rpt strip_tac >> irule product_component_eq >> fs[] >>
+map_every qexists_tac [‘B’,‘R’] >> simp[] >>
+‘FST (product B R) ∘ ⟨FST (product B Q), g ∘ SND (product B Q)⟩ ∘
+ ⟨FST (product B P),f ∘ SND (product B P)⟩ =
+ (FST (product B R) ∘ ⟨FST (product B Q),g ∘ SND (product B Q)⟩) ∘
+ ⟨FST (product B P),f ∘ SND (product B P)⟩’
+by fs[] >>
+‘(FST (product B R) ∘ ⟨FST (product B Q),g ∘ SND (product B Q)⟩) = FST (product B Q)’ by fs[] >>
+‘FST (product B Q) o ⟨FST (product B P),f ∘ SND (product B P)⟩ = FST (product B P)’ by fs[] >>
+fs[] >>
+‘SND (product B R) ∘ ⟨FST (product B Q),g ∘ SND (product B Q)⟩ ∘
+ ⟨FST (product B P),f ∘ SND (product B P)⟩ =
+ (SND (product B R) ∘ ⟨FST (product B Q),g ∘ SND (product B Q)⟩) ∘
+ ⟨FST (product B P),f ∘ SND (product B P)⟩’ by fs[] >>
+‘(SND (product B R) ∘ ⟨FST (product B Q),g ∘ SND (product B Q)⟩) = g ∘ SND (product B Q)’ by fs[] >>
+‘(g ∘ SND (product B Q)) o ⟨FST (product B P),f ∘ SND (product B P)⟩ =
+ g o SND (product B Q) o ⟨FST (product B P),f ∘ SND (product B P)⟩’ by fs[] >>
+‘SND (product B Q) o ⟨FST (product B P),f ∘ SND (product B P)⟩ = f ∘ SND (product B P)’ by fs[] >>
+fs[]
+QED
+
+
+Theorem pullback_unique:
+∀f g i1 j1 i2 j2.
+    is_pullback f g (i1,j1) ∧ is_pullback f g (i2,j2) ⇒
+    ∃!h. dom h = dom i2 ∧ cod h = dom i1 ∧ j1 o h = j2 ∧ i1 o h = i2 ∧ is_iso h
+Proof
+rw[is_pullback_def] >>
+‘∃!u1. dom u1 = dom j2 ∧ cod u1 = dom j1 ∧ i2 = i1 ∘ u1 ∧ j2 = j1 ∘ u1’ by metis_tac[] >>
+‘∃!u2. dom u2 = dom j1 ∧ cod u2 = dom j2 ∧ i1 = i2 ∘ u2 ∧ j1 = j2 ∘ u2’ by metis_tac[] >>
+fs[EXISTS_UNIQUE_ALT] >> qexists_tac ‘u1’ >> fs[] >>
+‘is_iso u1’ suffices_by metis_tac[] >>
+simp[is_iso_def] >> qexists_tac ‘u2’ >>
+‘u1 ∘ u2 = id (cod u1) ∧ u2 ∘ u1 = id (dom u1)’ suffices_by metis_tac[] >>
+‘u2 ∘ u1 = id (dom u1)’
+ by
+ (‘∃u. ∀u'. dom u' = dom j2 ∧ cod u' = dom j2 ∧ i2 = i2 ∘ u' ∧ j2 = j2 ∘ u' ⇔ u = u'’
+   by metis_tac[] >> 
+  ‘dom (id (dom u1)) = dom j2 ∧ cod (id (dom u1)) = dom j2 ∧ i2 = i2 ∘ (id (dom u1)) ∧
+   j2 = j2 ∘ (id (dom u1)) ⇔ u = id (dom u1)’ by fs[] >>
+  ‘dom u1 = dom j2 ∧ dom u1 = dom j2 ∧ i2 = i2 ∘ id (dom u1) ∧ j2 = j2 ∘ id (dom u1)’
+    by metis_tac[idR,id1] >> 
+  ‘dom (u2 o u1) = dom j2 ∧ cod (u2 o u1) = dom j2 ∧ i2 = i2 ∘ (u2 o u1) ∧ j2 = j2 ∘ (u2 o u1)’
+    suffices_by metis_tac[idR,id1] >>
+  ‘j2 = j2 ∘ u2 ∘ u1’
+    by (‘j2 o u2 = j1 ∧ j1 o u1 = j2’ by metis_tac[] >>
+        ‘cod u1 = dom u2’ by metis_tac[] >>
+        ‘cod u2 = dom j2’ by metis_tac[] >>
+        ‘j2 ∘ u2 ∘ u1 = (j2 ∘ u2) ∘ u1’ by fs[] >>
+        metis_tac[]) >>
+  ‘i2 = i2 ∘ u2 ∘ u1’
+    by (‘i2 o u2 = i1 ∧ i1 o u1 = i2’ by metis_tac[] >>
+        ‘cod u1 = dom u2’ by metis_tac[] >>
+        ‘cod u2 = dom i2’ by metis_tac[] >>
+        ‘i2 ∘ u2 ∘ u1 = (i2 ∘ u2) ∘ u1’ by fs[] >>
+        metis_tac[]) >>
+  metis_tac[compose]) >>
+fs[] >>
+‘∃u. ∀u'. dom u' = dom j1 ∧ cod u' = dom j1 ∧ i1 = i1 ∘ u' ∧ j1 = j1 ∘ u' ⇔ u = u'’ by metis_tac[]>>
+‘dom (id (cod u1)) = dom j1 ∧ cod (id (cod u1)) = dom j1 ∧ i1 = i1 ∘ (id (cod u1)) ∧
+ j1 = j1 ∘ (id (cod u1)) ⇔ u =  id (cod u1)’ by metis_tac[] >>
+‘dom (id (cod u1)) = dom j1 ∧ cod (id (cod u1)) = dom j1’ by metis_tac[id1] >> 
+‘i1 = i1 ∘ (id (cod u1)) ∧ j1 = j1 ∘ (id (cod u1))’ by fs[] >>
+‘dom (u1 o u2) = dom j1 ∧ cod (u1 o u2) = dom j1 ∧ i1 = i1 ∘ u1 o u2 ∧ j1 = j1 ∘ u1 o u2’
+ suffices_by metis_tac[] >>
+‘i1 = i1 ∘ u1 ∘ u2 ∧ j1 = j1 ∘ u1 ∘ u2’ suffices_by metis_tac[compose] >>
+‘i1 o u1 = i2 ∧ i2 o u2 = i1’ by metis_tac[] >> 
+‘j1 o u1 = j2 ∧ j2 o u2 = j1’ by metis_tac[] >>
+metis_tac[compose_assoc,compose]
+QED
+
+ 
+
+    
 Theorem singleton_is_mono:
 ∀B. is_mono (transpose (char (product_induce (id B) (id B))))
 Proof
+rw[] >> 
+‘is_mono ⟨id B,id B⟩’ by fs[] >> 
+‘dom ⟨id B,id B⟩ = B ∧ cod ⟨id B, id B⟩ = (B x B)’ by fs[] >>
+‘dom (char ⟨id B,id B⟩) = (B x B) ∧ cod (char ⟨id B,id B⟩) = omega’ by fs[] >>
+‘dom (transpose (char ⟨id B,id B⟩)) = B’ by metis_tac[transpose_def] >>
+‘cod (transpose (char ⟨id B,id B⟩)) = pow B’ by metis_tac[transpose_def] >>
+rw[is_mono_def] >>
+qabbrev_tac ‘X = dom g2’ >> qabbrev_tac ‘B = cod g2’ >>
+‘char ⟨id B,id B⟩ =
+ (mem B) o ⟨FST (product B B), transpose (char ⟨id B,id B⟩) o (SND (product B B))⟩’ by fs[] >>
+‘((char ⟨id B,id B⟩) ∘
+ ⟨FST (product B X),g1 ∘ SND (product B X)⟩) =
+ ((char ⟨id B,id B⟩) ∘
+ ⟨FST (product B X),g2 ∘ SND (product B X)⟩)’
+by
+ (‘(char ⟨id B,id B⟩) ∘
+   ⟨FST (product B X),g1 ∘ SND (product B X)⟩ =
+   (mem B) o ⟨FST (product B X), (transpose (char ⟨id B,id B⟩)) o g1 o (SND (product B X))⟩’
+   by
+    (‘((mem B) o ⟨FST (product B B), transpose (char ⟨id B,id B⟩) o (SND (product B B))⟩) o
+      ⟨FST (product B X),g1 ∘ SND (product B X)⟩ =
+      (mem B) o ⟨FST (product B X),transpose (char ⟨id B,id B⟩) ∘ g1 ∘ SND (product B X)⟩’
+      suffices_by metis_tac[] >>
+     ‘((mem B) o ⟨FST (product B B), transpose (char ⟨id B,id B⟩) o (SND (product B B))⟩) o
+      ⟨FST (product B X),g1 ∘ SND (product B X)⟩ =
+      (mem B) o ⟨FST (product B B), transpose (char ⟨id B,id B⟩) o (SND (product B B))⟩ o
+      ⟨FST (product B X),g1 ∘ SND (product B X)⟩’ by fs[] >>
+     ‘⟨FST (product B B),transpose (char ⟨id B,id B⟩) ∘ SND (product B B)⟩ ∘
+      ⟨FST (product B X),g1 ∘ SND (product B X)⟩ =
+      ⟨FST (product B X),transpose (char ⟨id B,id B⟩) ∘ g1 ∘ SND (product B X)⟩’
+      by metis_tac[product_one_component] >>
+     fs[]) >>
+   ‘(char ⟨id B,id B⟩) ∘
+   ⟨FST (product B X),g2 ∘ SND (product B X)⟩ =
+   (mem B) o ⟨FST (product B X), (transpose (char ⟨id B,id B⟩)) o g2 o (SND (product B X))⟩’
+   by
+    (‘((mem B) o ⟨FST (product B B), transpose (char ⟨id B,id B⟩) o (SND (product B B))⟩) o
+      ⟨FST (product B X),g2 ∘ SND (product B X)⟩ =
+      (mem B) o ⟨FST (product B X),transpose (char ⟨id B,id B⟩) ∘ g2 ∘ SND (product B X)⟩’
+      suffices_by metis_tac[] >>
+     ‘((mem B) o ⟨FST (product B B), transpose (char ⟨id B,id B⟩) o (SND (product B B))⟩) o
+      ⟨FST (product B X),g2 ∘ SND (product B X)⟩ =
+      (mem B) o ⟨FST (product B B), transpose (char ⟨id B,id B⟩) o (SND (product B B))⟩ o
+      ⟨FST (product B X),g2 ∘ SND (product B X)⟩’ by fs[] >>
+     ‘⟨FST (product B B),transpose (char ⟨id B,id B⟩) ∘ SND (product B B)⟩ ∘
+      ⟨FST (product B X),g2 ∘ SND (product B X)⟩ =
+      ⟨FST (product B X),transpose (char ⟨id B,id B⟩) ∘ g2 ∘ SND (product B X)⟩’
+      by metis_tac[product_one_component] >>
+     fs[]) >>
+   ‘transpose (char ⟨id B,id B⟩) ∘ g1 ∘ SND (product B X) =
+    (transpose (char ⟨id B,id B⟩) ∘ g1) ∘SND (product B X) ∧
+    transpose (char ⟨id B,id B⟩) ∘ g2 ∘ SND (product B X) =
+    (transpose (char ⟨id B,id B⟩) ∘ g2) ∘SND (product B X)’ by fs[] >>
+   metis_tac[]) >>
 
+    
+    
+    ‘dom (g1 ∘ SND (product (cod b) (dom b))) = dom (SND (product (cod b) (dom b)))’ by 
+     irule compose_dom >> rw[] (* 2 *)
+     >- ‘cod ⟨id (cod b),id (cod b)⟩ = ((cod b) x (cod b))’ by fs[] >>
+        ‘cod ⟨FST (product (cod b) (dom b)),g1 ∘ SND (product (cod b) (dom b))⟩ = ((cod b) x (cod b))’
+          simp[product_induce_def] >>
+        
+          by fs[]
+     ‘dom (char ⟨id (cod b),id (cod b)⟩ ∘
+           ⟨FST (product (cod b) (dom b)),g1 ∘ SND (product (cod b) (dom b))⟩) =
+      dom (g1 ∘ SND (product (cod b) (dom b)))’
+      by irule compose
+
+))
 QED
 
 val _ = clear_overloads_on "x";
