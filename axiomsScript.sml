@@ -66,7 +66,7 @@ val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   pp_elements = [TOK "x"], 
                   term_name = "product_obj", paren_style = OnlyIfNecessary}     
                                                             
-                                                                  
+val product_assoc = new_axiom("product_assoc",“∀A B C. ((A x B) x C) = (A x (B x C))”)                                                                   
 (* pullback *)
 
 
@@ -131,6 +131,9 @@ val true_def = new_axiom("true_def", “is_mono true ∧ dom true = terminal ∧
                               ∀m. is_mono m ⇒
                                   ∃!char. dom char = cod m ∧ cod char = omega ∧
                                           is_pullback char true (m, (X2t (dom m)))”)
+
+val univalence = new_axiom("univalence", “∀A B. A ≅ B ⇒ A = B”)
+                                          
 
 Theorem true_itself[simp]:
 is_mono true ∧ dom true = terminal ∧ cod true = omega
@@ -777,16 +780,12 @@ by
 irule  product_right_compose_eq >> simp[] >> qexists_tac ‘h’ >> simp[]
 QED
 
-val _ = clear_overloads_on "x";
-        
-Overload product_obj = “λA B. dom (SND (product A B))”
-val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
-                  fixity = Infix (NONASSOC,450), 
-                  pp_elements = [TOK "x"], 
-                  term_name = "product_obj", paren_style = OnlyIfNecessary}     
-
 
 (*need lemma pullback of mono is mono*)
+(*
+Theorem transpose_true_mono:
+*)
+
                   
 Theorem exponential_exists:
 ∀B C. ∃B2C e.
@@ -796,6 +795,24 @@ Theorem exponential_exists:
                  f = e o ⟨FST (product B A), g o (SND (product B A))⟩
 Proof
 rw[] >>
+‘is_mono (transpose (char ⟨id C,id C⟩))’ by metis_tac[singleton_is_mono] >>
+drule char_def >> strip_tac >>
+‘dom (char ⟨id C,id C⟩) = (C x C) ∧ cod (char ⟨id C,id C⟩) = omega’ by fs[char_def] >>
+‘dom (transpose (char ⟨id C,id C⟩)) = C ∧ cod (transpose (char ⟨id C,id C⟩)) = pow C’
+ by metis_tac[transpose_def] >> 
+‘dom (char (transpose (char ⟨id C,id C⟩))) = pow C’ by fs[char_def] >>
+‘is_pullback (char (transpose (char ⟨id C,id C⟩))) true ((transpose (char ⟨id C,id C⟩)),(X2t C))’
+ by metis_tac[char_def] >>
+qabbrev_tac ‘dot = (transpose (char (product_induce (id C) (id C))))’ >>
+qabbrev_tac ‘σc = char (transpose (char (product_induce (id C) (id C))))’ >>
+qabbrev_tac ‘v = transpose (mem (B x C))’ >>
+qabbrev_tac ‘u = transpose (σc o v)’ >>
+‘∃m. is_pullback (transpose ’
+
+
+
+
+ 
 ‘∃f. is_iso f ∧ dom f = ((C x B) x (pow (C x B))) ∧ cod f = (C x (B x (pow (C x B))))’ by cheat >>
 ‘∃i. is_iso i ∧ (dom i = (B x terminal)) ∧ cod i = B’ by cheat >>
 qabbrev_tac ‘v = transpose (f o (mem (B x C)))’ >>
