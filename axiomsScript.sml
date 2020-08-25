@@ -685,7 +685,23 @@ fs[] >>
 metis_tac[compose_assoc,compose]
 QED
 
- 
+Theorem product_right_compose_eq:
+∀B X h b b'. dom h = X ∧ cod h = X ∧ dom b  = X ∧ cod b = B ∧ dom b' = X ∧ cod b' = B ∧ ⟨b', id X⟩ o h = ⟨b , id X⟩ ⇒  b = b'
+Proof
+rpt strip_tac >>
+‘(FST (product B X)) o ⟨b',id (dom b')⟩ ∘ h = (FST (product B X)) o ⟨b,id (dom b')⟩’ by fs[] >>
+‘FST (product B X) ∘ ⟨b',id (dom b')⟩ ∘ h = (FST (product B X) ∘ ⟨b',id (dom b')⟩) ∘ h ’ by fs[] >>
+‘(FST (product B X) ∘ ⟨b',id (dom b')⟩) = b'’ by fs[] >>
+‘FST (product B X) ∘ ⟨b,id (dom b')⟩ = b’ by fs[] >>
+‘b = b' o h’ by metis_tac[] >>
+‘h = id X’ suffices_by metis_tac[idR] >>
+‘(SND (product B X)) o ⟨b',id X⟩ ∘ h = (SND (product B X)) o ⟨b,id X⟩’ by metis_tac[] >>
+‘(SND (product B X)) o ⟨b',id X⟩ ∘ h = h’
+  by (‘(SND (product B X)) o ⟨b',id X⟩ ∘ h = ((SND (product B X)) o ⟨b',id X⟩) ∘ h’ by simp[] >>
+      ‘((SND (product B X)) o ⟨b',id X⟩) = id X’ by simp[] >>
+      metis_tac[idL]) >>
+‘(SND (product B X)) o ⟨b,id X⟩ = id X’ by fs[] >> metis_tac[]
+QED
 
     
 Theorem singleton_is_mono:
