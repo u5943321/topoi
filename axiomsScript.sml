@@ -64,7 +64,15 @@ Overload product_obj = “λA B. dom (SND (product A B))”
 val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
                   fixity = Infix (NONASSOC,450), 
                   pp_elements = [TOK "x"], 
-                  term_name = "product_obj", paren_style = OnlyIfNecessary}     
+                  term_name = "product_obj", paren_style = OnlyIfNecessary}
+
+Overload product_arrow = “λf g. ⟨f o (FST (product (dom f) (dom g))),
+                                 g o (SND (product (dom f) (dom g)))⟩”
+
+val _ = add_rule {block_style = (AroundEachPhrase, (PP.CONSISTENT, 0)),
+                  fixity = Closefix, 
+                  pp_elements = [TOK "(",TM, TOK "×",TM,TOK ")"], 
+                  term_name = "product_arrow", paren_style = OnlyIfNecessary}                                                  
                                                             
 val product_assoc = new_axiom("product_assoc",“∀A B C. ((A x B) x C) = (A x (B x C))”)                                                                   
 (* pullback *)
@@ -784,7 +792,88 @@ QED
 (*need lemma pullback of mono is mono*)
 (*
 Theorem transpose_true_mono:
+∀B. is_mono (transpose (true o (X2t B) o (FST (product B terminal)))) =      
 *)
+
+Theorem product_induce_component_eq:
+∀f g i j. dom f = dom g ∧
+          f = i ∧ g = j ⇒
+⟨f,g⟩ = ⟨i,j⟩
+Proof        
+rw[]
+QED
+
+Theorem time_with_square:
+∀a b c d A B C D X. dom a = A ∧ cod a = B ∧ dom b = B ∧ cod b = D ∧ dom c = C ∧ cod c = D ∧
+                    dom d = A ∧ cod d = C ∧ c o d = b o a ⇒
+                    ((id X) × c) o ((id X) × d) = ((id X) × b) o ((id X) × a)
+Proof   
+rw[] >> irule product_component_eq >> simp[] >> map_every qexists_tac[‘X’,‘cod c’] >> simp[] >>
+rw[] (* 2 *)
+>- (‘FST (product X (cod c)) ∘
+        ⟨FST (product X (cod d)),c ∘ SND (product X (cod d))⟩ =
+    FST (product X (cod d))’ by fs[] >>
+   ‘FST (product X (cod d)) o ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩ =
+    FST (product X (dom d))’ by fs[] >>
+   ‘FST (product X (cod c)) ∘
+        ⟨FST (product X (cod d)),c ∘ SND (product X (cod d))⟩ ∘
+        ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩ =
+    (FST (product X (cod c)) ∘
+        ⟨FST (product X (cod d)),c ∘ SND (product X (cod d))⟩) ∘
+        ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩’ by fs[] >>
+   ‘FST (product X (cod c)) ∘
+    ⟨FST (product X (cod d)),c ∘ SND (product X (cod d))⟩ ∘
+    ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩ =  FST (product X (dom d))’
+         by metis_tac[] >>
+   ‘FST (product X (cod c)) ∘
+        ⟨FST (product X (dom b)),b ∘ SND (product X (dom b))⟩ = FST (product X (dom b))’ by fs[] >>
+   ‘FST (product X (dom b)) o ⟨FST (product X (dom d)),a ∘ SND (product X (dom d))⟩ =
+   FST (product X (dom d))’ by fs[] >>
+   ‘FST (product X (cod c)) ∘
+        ⟨FST (product X (dom b)),b ∘ SND (product X (dom b))⟩ ∘
+        ⟨FST (product X (dom d)),a ∘ SND (product X (dom d))⟩ =
+    (FST (product X (cod c)) ∘
+        ⟨FST (product X (dom b)),b ∘ SND (product X (dom b))⟩) ∘
+        ⟨FST (product X (dom d)),a ∘ SND (product X (dom d))⟩’ by fs[] >>
+   metis_tac[]) >>
+‘SND (product X (cod c)) ∘
+        ⟨FST (product X (cod d)),c ∘ SND (product X (cod d))⟩ ∘
+        ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩ =
+ (SND (product X (cod c)) ∘
+        ⟨FST (product X (cod d)),c ∘ SND (product X (cod d))⟩) ∘
+        ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩’ by fs[] >>
+‘SND (product X (cod c)) ∘
+ ⟨FST (product X (cod d)),c ∘ SND (product X (cod d))⟩ = c ∘ SND (product X (cod d))’ by fs[] >>
+‘(c ∘ SND (product X (cod d))) o ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩ =
+ c o SND (product X (cod d)) o ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩’ by fs[] >>
+‘SND (product X (cod d)) o ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩ =
+ d ∘ SND (product X (dom d))’ by fs[] >>
+‘SND (product X (cod c)) ∘
+        ⟨FST (product X (cod d)),c ∘ SND (product X (cod d))⟩ ∘
+        ⟨FST (product X (dom d)),d ∘ SND (product X (dom d))⟩ = c o d o SND (product X (dom d))’
+ by metis_tac[] >>
+‘SND (product X (cod c)) ∘
+        ⟨FST (product X (dom b)),b ∘ SND (product X (dom b))⟩ ∘
+        ⟨FST (product X (dom d)),a ∘ SND (product X (dom d))⟩ =
+ (SND (product X (cod c)) ∘
+        ⟨FST (product X (dom b)),b ∘ SND (product X (dom b))⟩) ∘
+        ⟨FST (product X (dom d)),a ∘ SND (product X (dom d))⟩’ by fs[] >>
+‘(SND (product X (cod c)) ∘
+        ⟨FST (product X (dom b)),b ∘ SND (product X (dom b))⟩) = b ∘ SND (product X (dom b))’
+ by fs[] >>
+‘SND (product X (cod c)) ∘
+        ⟨FST (product X (dom b)),b ∘ SND (product X (dom b))⟩ ∘
+        ⟨FST (product X (dom d)),a ∘ SND (product X (dom d))⟩ =
+ b ∘ SND (product X (dom b)) o ⟨FST (product X (dom d)),a ∘ SND (product X (dom d))⟩’ by fs[] >>
+‘SND (product X (dom b)) o ⟨FST (product X (dom d)),a ∘ SND (product X (dom d))⟩ =
+a ∘ SND (product X (dom d))’ by fs[] >>
+‘SND (product X (cod c)) ∘
+        ⟨FST (product X (dom b)),b ∘ SND (product X (dom b))⟩ ∘
+        ⟨FST (product X (dom d)),a ∘ SND (product X (dom d))⟩ = b o a o SND (product X (dom d))’ by fs[] >>
+‘(c ∘ d) ∘ SND (product X (dom d)) = c ∘ d ∘ SND (product X (dom d)) ∧ 
+(b ∘ a) ∘ SND (product X (dom d)) = b ∘ a ∘ SND (product X (dom d))’ suffices_by metis_tac[] >>
+rw[]
+QED
 
                   
 Theorem exponential_exists:
@@ -796,7 +885,32 @@ Theorem exponential_exists:
 Proof
 rw[] >>
 ‘is_mono (transpose (char ⟨id C,id C⟩))’ by metis_tac[singleton_is_mono] >>
+qabbrev_tac ‘δ = char ⟨id C, id C⟩’ >>
+qabbrev_tac ‘dot = transpose δ’ >>
 drule char_def >> strip_tac >>
+qabbrev_tac ‘σ = char dot’ >>
+qabbrev_tac ‘htb = transpose (true o (X2t (terminal x B)))’ >>
+qabbrev_tac ‘v = transpose (mem (C x B))’ >>
+qabbrev_tac ‘u = transpose (σ ∘ v)’ >>
+‘dom δ = (C x C)’ by cheat >>
+‘cod δ = omega’ by cheat >>
+‘dom dot = C’ by cheat >>
+‘cod dot = pow C’ by cheat >>
+‘dom σ = pow C’ by cheat >>
+‘dom htb = terminal’ by cheat >>
+‘cod htb = pow B’ by cheat >>
+‘dom v = (B x (pow (C x B)))’ by cheat >>
+‘cod v = pow C’ by cheat >>
+‘dom u = pow (C x B)’ by cheat >>
+‘cod u = pow B’ by cheat >>
+drule (is_pullback_def |> SPEC_ALL |> EQ_IMP_RULE |> #1) >> simp[] >> rpt strip_tac >>
+‘∃m. is_pullback u htb (m,(X2t BC))’ by cheat >>
+drule (is_pullback_def |> SPEC_ALL |> EQ_IMP_RULE |> #1) >> simp[] >> rpt strip_tac >>
+‘(mem B) o ⟨FST (product B (pow (C x B))), u o (SND (product B (pow (C x B))))⟩ = σ o v’
+  by fs[transpose_def,Abbr‘u’] >>
+
+
+            
 ‘dom (char ⟨id C,id C⟩) = (C x C) ∧ cod (char ⟨id C,id C⟩) = omega’ by fs[char_def] >>
 ‘dom (transpose (char ⟨id C,id C⟩)) = C ∧ cod (transpose (char ⟨id C,id C⟩)) = pow C’
  by metis_tac[transpose_def] >> 
@@ -804,11 +918,79 @@ drule char_def >> strip_tac >>
 ‘is_pullback (char (transpose (char ⟨id C,id C⟩))) true ((transpose (char ⟨id C,id C⟩)),(X2t C))’
  by metis_tac[char_def] >>
 qabbrev_tac ‘dot = (transpose (char (product_induce (id C) (id C))))’ >>
-qabbrev_tac ‘σc = char (transpose (char (product_induce (id C) (id C))))’ >>
-qabbrev_tac ‘v = transpose (mem (B x C))’ >>
+qabbrev_tac ‘σc = char dot’ >>
+qabbrev_tac ‘v = transpose (mem (C x B))’ >>
 qabbrev_tac ‘u = transpose (σc o v)’ >>
-‘∃m. is_pullback (transpose ’
+‘dom u = pow (C x B) ∧ cod u = pow C ∧ dom v = (B x (pow (C x B))) ∧ cod v = pow C’ by cheat >>
+(*skip of the proof of domain ∧ cod*)
+‘is_pullback (transpose (true o (X2t B))) u ((X2t (dom m)),m)’ by cheat >> 
+qabbrev_tac ‘BC = dom m’ >>
+‘true o (X2t (B x BC)) = σc o v o ⟨FST (product B BC),m o (SND (product B BC))⟩’
+  by cheat >>
+fs[is_pullback_def] >>
+last_x_assum (qspecl_then
+              [‘v o ⟨FST (product B BC),m o (SND (product B BC))⟩’,‘(X2t (B x BC))’] mp_tac) >>
+rpt strip_tac >> rfs[] >> fs[EXISTS_UNIQUE_ALT] >>
+rename [‘∀e'.
+            dom e' = (B x BC) ∧ cod e' = C ∧
+            v ∘ ⟨FST (product B BC),m ∘ SND (product B BC)⟩ = dot ∘ e' ∧
+            X2t (B x BC) = X2t C ∘ e' ⇔ e = e'’] >> 
+map_every qexists_tac [‘BC’,‘e’] >> rw[] (* 3 *)
+>- metis_tac[] >- metis_tac[] >>
+qabbrev_tac ‘C = dom dot’ >>
+qabbrev_tac ‘h = transpose ((char ⟨id C,id C⟩) o
+                            ⟨FST (product C (B x A)),f o SND (product C (B x A))⟩)’ >>
+‘u o h = (transpose (true ∘ X2t B)) o (X2t A)’ by cheat >>
+‘dom h = A ∧ dom (X2t A) = A ∧ cod h = pow (C x B) ∧ cod (X2t A) = terminal’ by cheat >>
+last_x_assum (qspecl_then [‘X2t A’,‘h’] mp_tac) >> simp[] >> rpt strip_tac >>
+rename [‘∀u''. dom u'' = A ∧ cod u'' = BC ∧ X2t A = X2t BC ∘ u'' ∧ h = m ∘ u'' ⇔ g = u''’] >>
+qexists_tac ‘g’ >>
+‘∀g. dom g = A ∧ cod g = BC ⇒
+ (f = e ∘ ⟨FST (product B A),g ∘ SND (product B A)⟩ ⇔
+ mem C ∘ ⟨FST (product C (B x A)),
+          (v ∘ ⟨FST (product B A),SND (product B A) ∘ m ∘ g⟩) ∘
+         SND (product C (B x A))⟩ =
+         mem (C x B) ∘
+         ⟨FST (product C (B x A)),m ∘ g ∘ SND (product C (B x A))⟩)’
 
+
+            
+‘dom g = A ∧ cod g = BC ∧ f = e ∘ ⟨FST (product B A),g ∘ SND (product B A)⟩’
+ by
+  (‘f = e ∘ ⟨FST (product B A),g ∘ SND (product B A)⟩’ suffices_by metis_tac[] >>
+   ‘dot o f = dot o e ∘ ⟨FST (product B A),g ∘ SND (product B A)⟩’ suffices_by cheat >>
+   (*because dot is a mono*)
+   ‘dot o f = v o ⟨FST (product B A),SND (product B A) o m o g⟩’ suffices_by cheat >>
+   (*by commutivity*)
+   ‘(mem C) o ⟨FST (product C (B x A)),dot o f o (SND (product C (B x A)))⟩ =
+    (mem C) o ⟨FST (product C (B x A)),(v o ⟨FST (product B A),SND (product B A) o m o g⟩) o
+                                       (SND (product C (B x A)))⟩’ suffices_by cheat >>
+   (*the above is because transpose is unique*)
+   ‘(mem C) o ⟨FST (product C (B x A)),dot o f o (SND (product C (B x A)))⟩ =
+   (mem C) o ⟨FST (product C C),dot o (SND (product C C))⟩ o
+   ⟨FST (product C (B x A)), f o (SND (product C (B x A)))⟩’ by cheat   (*diagram on paper*)      >>
+   ‘(mem C) o ⟨FST (product C (B x A)),(v o ⟨FST (product B A),SND (product B A) o m o g⟩) o
+                                       (SND (product C (B x A)))⟩ =
+    mem (C x B) o ⟨FST (product C (B x A)), m o g o SND (product C (B x A))⟩’ by cheat (*diagram on paper*) >>
+    ‘(mem C) o ⟨FST (product C C),dot o (SND (product C C))⟩ o
+   ⟨FST (product C (B x A)), f o (SND (product C (B x A)))⟩ =
+   mem (C x B) o ⟨FST (product C (B x A)), m o g o SND (product C (B x A))⟩’
+   suffices_by metis_tac[] >>
+   ‘mem C ∘ ⟨FST (product C C),dot ∘ SND (product C C)⟩ ∘
+        ⟨FST (product C (B x A)),f ∘ SND (product C (B x A))⟩ =
+        mem (C x B) ∘
+        ⟨FST (product C (B x A)),h ∘ SND (product C (B x A))⟩’ suffices_by cheat >>
+        (*already known h = mg*)
+    
+                        ) 
+
+
+
+irule product_induce_cod)
+ 
+‘∃!e0. dom e0 = (B x BC) ∧ cod u = C ∧
+ v o ⟨FST (product B BC),m o (SND (product B BC))⟩ = dot o e0’
+metis_tac[is_pullback_def,Abbr‘dot’]
 
 
 
