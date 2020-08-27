@@ -1118,6 +1118,10 @@ drule transpose_121 >> simp[] >> strip_tac >>
 
 
 
+ --------------
+
+
+
 
 
 
@@ -1266,5 +1270,3 @@ metis_tac[] cheat
 
 
                   
-colimit:
-‘∀J. ’
